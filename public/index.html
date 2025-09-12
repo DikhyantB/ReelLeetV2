@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReelLeet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .card-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
+        .question-card {
+            flex-shrink: 0;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start;
+        }
+
+        .question-box {
+            background-color: #161b22;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: left;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #30363d;
+            transform: translateY(-2px);
+        }
+
+        .correct {
+            background-color: #238636;
+            border-color: #238636;
+            color: white;
+        }
+
+        .incorrect {
+            background-color: #da3633;
+            border-color: #da3633;
+            color: white;
+        }
+
+        .correct-answer {
+            color: #238636;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .start-screen {
+            background-color: #161b22;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .start-screen select,
+        .start-button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        .start-screen select {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+
+        .start-button {
+            background-color: #1f6feb;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .start-button:hover {
+            background-color: #297ee6;
+        }
+
+        .start-button:disabled {
+            background-color: #404040;
+            cursor: not-allowed;
+        }
+        
+        .score-tracker {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(22, 27, 34, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .score-tracker.visible {
+            display: block;
+        }
+        
+        .start-over-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #da3633;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .start-over-button:hover {
+            background-color: #b82b28;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="start-screen" class="start-screen">
+            <h1 class="text-3xl font-bold mb-2 text-blue-400">ReelLeet</h1>
+            <p class="text-gray-400 mb-6">Select your preferences to start.</p>
+            
+            <div class="mb-4">
+                <label for="difficulty" class="block text-sm font-medium text-gray-400 text-left mb-1">Difficulty</label>
+                <select id="difficulty" class="p-2 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="all">Any Difficulty</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            
+            <div class="mb-6">
+                <label for="topic" class="block text-sm font-medium text-gray-400 text-left mb-1">Topic</label>
+                <select id="topic" class="p-2 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="all">All Topics</option>
+                    <option value="arrays">Arrays</option>
+                    <option value="strings">Strings</option>
+                    <option value="linked-lists">Linked Lists</option>
+                    <option value="recursion">Recursion</option>
+                    <option value="trees">Trees</option>
+                    <option value="graphs">Graphs</option>
+                    <option value="data-structures">Data Structures</option>
+                    <option value="algorithms">Algorithms</option>
+                </select>
+            </div>
+            
+            <button id="start-button" class="start-button transition">Start</button>
+            <p id="error-message" class="text-red-500 mt-4 text-sm hidden"></p>
+        </div>
+
+        <div id="quiz-screen" class="hidden container">
+            <button id="start-over-button" class="start-over-button hidden">Start Over</button>
+            <div id="quiz-container" class="card-container"></div>
+            <div id="score-tracker" class="score-tracker hidden">
+                Correct: <span id="correct-count">0</span> | Incorrect: <span id="incorrect-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startScreen = document.getElementById('start-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            const startButton = document.getElementById('start-button');
+            const quizContainer = document.getElementById('quiz-container');
+            const errorMessage = document.getElementById('error-message');
+            const scoreTracker = document.getElementById('score-tracker');
+            const correctCount = document.getElementById('correct-count');
+            const incorrectCount = document.getElementById('incorrect-count');
+            const startOverButton = document.getElementById('start-over-button');
+
+            let allQuestions = [];
+            let currentQuiz = [];
+            let currentQuestionIndex = 0;
+            let correctAnswers = 0;
+            let incorrectAnswers = 0;
+            let quizStarted = false;
+
+            const fetchQuestions = async () => {
+                try {
+                    const response = await fetch('/questions');
+                    if (!response.ok) {
+                        throw new Error(`Failed to load questions: ${response.statusText}`);
+                    }
+                    allQuestions = await response.json();
+                    startButton.disabled = false;
+                    startButton.textContent = 'Start';
+                } catch (error) {
+                    errorMessage.textContent = 'Failed to load questions. Please ensure the backend server is running.';
+                    errorMessage.classList.remove('hidden');
+                    startButton.disabled = true;
+                    startButton.textContent = 'Retry';
+                    console.error('Error fetching questions:', error);
+                }
+            };
+
+            const shuffleArray = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            const renderQuestion = (questionData, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.className = 'question-card snap-start flex flex-col justify-center items-center p-4';
+                questionElement.id = `question-${index}`;
+
+                const questionBox = document.createElement('div');
+                questionBox.className = 'question-box';
+
+                const questionContent = `
+                    <p class="text-gray-400 text-sm mb-4">${index + 1}/${currentQuiz.length}</p>
+                    <h2 class="text-2xl font-semibold mb-6">${questionData.question}</h2>
+                    <div class="options">
+                        ${questionData.options.map((option) =>
+                            `<button class="option-button" data-option="${option}">${option}</button>`
+                        ).join('')}
+                    </div>
+                `;
+                questionBox.innerHTML = questionContent;
+                questionElement.appendChild(questionBox);
+                quizContainer.appendChild(questionElement);
+
+                questionBox.querySelectorAll('.option-button').forEach(button => {
+                    button.addEventListener('click', () => checkAnswer(button, questionData));
+                });
+            };
+
+            const checkAnswer = (button, questionData) => {
+                const selectedOption = button.dataset.option;
+                const correctAnswer = questionData.correctAnswer;
+                const buttons = button.parentElement.querySelectorAll('.option-button');
+
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.dataset.option === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                    if (btn.dataset.option === selectedOption && selectedOption !== correctAnswer) {
+                        btn.classList.add('incorrect');
+                    }
+                });
+
+                if (selectedOption === correctAnswer) {
+                    correctAnswers++;
+                } else {
+                    incorrectAnswers++;
+                }
+
+                updateScore();
+
+                setTimeout(() => {
+                    // Auto-scroll to the next question
+                    const nextIndex = currentQuestionIndex + 1;
+                    if (nextIndex < currentQuiz.length) {
+                        const nextQuestionElement = document.getElementById(`question-${nextIndex}`);
+                        if (nextQuestionElement) {
+                            nextQuestionElement.scrollIntoView({ behavior: 'smooth' });
+                            currentQuestionIndex = nextIndex;
+                        }
+                    }
+                }, 1000); // 1-second delay
+            };
+
+            const updateScore = () => {
+                correctCount.textContent = correctAnswers;
+                incorrectCount.textContent = incorrectAnswers;
+            };
+
+            const startQuiz = () => {
+                const selectedDifficulty = document.getElementById('difficulty').value;
+                const selectedTopic = document.getElementById('topic').value;
+
+                let filteredQuestions = allQuestions;
+
+                if (selectedDifficulty !== 'all') {
+                    filteredQuestions = filteredQuestions.filter(q => q.difficulty === selectedDifficulty);
+                }
+
+                if (selectedTopic !== 'all') {
+                    filteredQuestions = filteredQuestions.filter(q => q.topic === selectedTopic);
+                }
+                
+                if (filteredQuestions.length === 0) {
+                    errorMessage.textContent = 'No questions found for the selected criteria.';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                currentQuiz = shuffleArray(filteredQuestions);
+                correctAnswers = 0;
+                incorrectAnswers = 0;
+                updateScore();
+                
+                quizContainer.innerHTML = '';
+                currentQuiz.forEach((q, index) => renderQuestion(q, index));
+                
+                startScreen.classList.add('hidden');
+                quizScreen.classList.remove('hidden');
+                scoreTracker.classList.remove('hidden');
+                startOverButton.classList.remove('hidden');
+                
+                currentQuestionIndex = 0;
+                quizContainer.scrollTo({ top: 0 });
+                
+                quizStarted = true;
+                errorMessage.classList.add('hidden');
+            };
+            
+            const startOver = () => {
+                currentQuiz = [];
+                correctAnswers = 0;
+                incorrectAnswers = 0;
+                quizStarted = false;
+                
+                startScreen.classList.remove('hidden');
+                quizScreen.classList.add('hidden');
+                scoreTracker.classList.add('hidden');
+                startOverButton.classList.add('hidden');
+                quizContainer.innerHTML = '';
+                
+                fetchQuestions();
+            };
+
+            startButton.addEventListener('click', startQuiz);
+            startOverButton.addEventListener('click', startOver);
+            
+            // Initial fetch
+            fetchQuestions();
+        });
+    </script>
+
+</body>
+</html>
