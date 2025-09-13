@@ -1,8 +1,10 @@
 const express = require('express');
+const cors = require('cors');
+const path = require('path');
 const app = express();
 
-const cors = require('cors');
 app.use(cors());
+app.use(express.static(__dirname)); // This serves index.html
 
 const questions = [
     {
@@ -847,8 +849,12 @@ const questions = [
     }
 ];
 
-app.get('/api/questions', (req, res) => {
+app.get('/questions', (req, res) => {
   res.json(questions);
 });
 
-module.exports = app;
+// Railway (like Render) provides a PORT variable
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
