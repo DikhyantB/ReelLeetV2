@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/questions",
-      "destination": "/api/questions"
-    }
-  ]
-}
